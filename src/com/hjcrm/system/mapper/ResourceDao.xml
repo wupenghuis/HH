@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.mapper.ResourceDao">
+	<select id="queryResource"   resultType="resource">
+		select *,c.courseName from hj_resource r LEFT JOIN hj_course c on r.resourceId=c.courseid
+		<where>
+			<if test="userid!=1 and userid!=''">
+				and userid=#{userid}  and state=0 or state=1
+			</if>
+		</where>
+		limit #{currentPage}, #{pageSize};
+	</select>
+	<select id="queryAllCreatePersons" resultType="resource">
+		select DISTINCT (createrName) from hj_resource where userid=#{userid}
+	</select>
+	<select id="queryAllResourceInfoCount" resultType="int" >
+		select count(*) from hj_resource
+	</select>
+	<select id="queryAllCreatePerson"  resultType="resource">
+		select * from hj_resource
+	</select>
+	<update id="updateResource" parameterType="resource">
+		update hj_resource set resourceName=#{resourceName},phone=#{phone},
+		tel=#{tel},weixin=#{weixin},
+		qq=#{qq},address=#{address},
+		source=#{source},courseid=#{courseid},
+		yunYingNote=#{yunYingNote}
+		where resourceId=#{resourceId}
+	</update>
+	<insert id="addResource" parameterType="resource">
+		insert into hj_resource(resourceId,userid,deptid,resourceName,phone,tel,weixin,qq,address,source,courseid,resourceLevel,yunYingNote,xiaoShouNote) values
+		(#{resourceId},#{userid},#{deptid},#{resourceName},#{phone},#{tel},#{weixin},#{qq},#{address},#{source},#{courseid},#{resourceLevel},#{yunYingNote},#{xiaoShouNote});
+	</insert>
+	<delete id="deleteResource" parameterType="java.util.List">
+		delete from hj_resource where resourceId in
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="queryResourceCount" parameterType="pattertype" resultType="int">
+		select count(*) from hj_resource <where>
+		<if test="userid!=1 and userid!=''">
+			and userid=#{userid}
+		</if>
+	</where>
+	</select>
+    <update id="assigntoResource" parameterType="resource">
+        update hj_resource set belongid=#{belongid},state=1
+        where resourceId=#{resourceId};
+    </update>
+	<update id="updateById" parameterType="resource">
+        update hj_resource set resourceName=#{resourceName},
+idCard=#{idCard},email=#{email},phone=#{phone},courseid=#{courseid},tel=#{tel},
+weixin=#{weixin},qq=#{qq},address=#{address},nextVisitTime=#{nextVisitTime},
+xiaoShouNote=#{xiaoShouNote},resourceLevel=#{resourceLevel}
+where resourceId=#{resourceId};
+    </update>
+	<select id="queryResourceById" parameterType="resource" resultType="resource">
+		select r.*,u.username belongName,s.subjectname courseName from hj_resource r
+        left join hj_user u on r.belongid=u.userid
+        left join hj_subject s on r.courseid=s.subjectid
+        where r.state=1 and r.resourceId=#{resourceId}
+	</select>
+	<update id="updateByIdResource" parameterType="resource">
+		update hj_resource set
+					address=#{address},resourceName=#{resourceName},phone=#{phone},
+					email=#{email},idCard=#{idCard},tel=#{tel},
+					weixin=#{weixin},qq=#{qq},nextVisitTime=#{nextVisitTime},xiaoShouNote=#{xiaoShouNote},
+					resourceLevel=#{resourceLevel}
+					where resourceId=#{resourceId}
+	</update>
+	<update id="updateByresorceIdState" parameterType="dealrecord">
+		update hj_resource set state=2 where resourceId=#{resourceId}
+	</update>
+
+	<!--销售部详细信息-->
+	<select id="selectDetailsResource" parameterType="int" resultType="resource">
+       select resourceId,hj_resource.userid,hj_resource.create_time,hj_resource.state,isZhuanyi,createrName,hj_resource.create_time,
+        source,address,resourceName,hj_resource.phone,hj_course.courseName as courseName,hj_user.username belongName,yunYingNote,
+        firstVisitTime,nextVisitTime,assignTime,yunYingNote,hj_resource.email,idCard,tel,weixin,qq,nextVisitTime,xiaoShouNote,resourceLevel
+        from hj_resource left join hj_course on hj_resource.courseid=hj_course.courseid left join hj_user on hj_resource.belongid=hj_user.userid
+         where resourceId=#{resourceId}
+    </select>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.mapper.MenuDao">
+
+
+	<select id="queryMenuByRoleId" parameterType="hashmap" resultType="menu">
+		select DISTINCT(m.menuid),m.menuname,m.menuurl,m.menuimgurl from hj_role r
+		LEFT JOIN hj_role_menu rm on r.roleid = rm.roleid
+		left join hj_menu m on m.menuid = rm.menuid
+
+		<where>
+			<if test="roleid!=null and roleid!=''">
+				and r.roleid=#{roleid}
+			</if>
+			<if test="menuparaid!=null and menuparaid!=''">
+				and m.menuparaid=#{menuparaid}
+			</if>
+		</where>
+	</select>
+
+	<insert id="addOrUpdateMenu" parameterType="menu">
+		insert into hj_menu(menuparaid,menuno,menuname,menucode,menuurl,menuimgurl) values
+		(#{menuparaid},#{menuno},#{menuname},#{menucode},#{menuurl},#{menuimgurl});
+	</insert>
+	<delete id="deleteMenu" parameterType="java.util.List">
+		delete from hj_menu where menuid in
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<update id="updateMenu" parameterType="menu">
+		  update hj_menu set menuparaid=#{menuparaid},menuno=#{menuno},menuname=#{menuname},menucode=#{menucode},menuurl=#{menuurl},menuimgurl=#{menuimgurl}
+		  where menuid=#{menuid}
+	</update>
+
+	<!--判断当前菜单：  一级菜单，没有二级菜单  、  二级菜单 -->
+	<select id="hasSecondaryChild" parameterType="int" resultType="menu">
+          select menuid from hj_menu where menuparaid = #{menuid}
+    </select>
+
+	<!--查看当前菜单是否被分类-->
+	<select id="hasRoles" parameterType="int" resultType="role_menu">
+         select menuid from hj_role_menu where menuid=#{menuid}
+    </select>
+
+	<!--删除菜单-->
+	<delete id="deleteMenuById" parameterType="int">
+        delete from hj_menu where menuid=#{menuid}
+    </delete>
+	<select id="queryAllMenu" parameterType="hashmap" resultType="menu">
+		select DISTINCT(m.menuid),m.menuname,m.menuurl,m.menuimgurl from hj_menu m
+		LEFT JOIN hj_role_menu rm on m.menuid = rm.menuid
+		left join hj_role r   on r.roleid = rm.roleid
+
+		<where>
+			<if test="roleid!=null and roleid!=''">
+				and r.roleid=#{roleid}
+			</if>
+			<if test="menuparaid!=null and menuparaid!=''">
+				and m.menuparaid=#{menuparaid}
+			</if>
+		</where>
+	</select>
+</mapper>
